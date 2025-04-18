@@ -1,0 +1,33 @@
+name: simple-python-formmater
+
+on:
+    workflow_dispatch:
+
+jobs:
+    python-formmater:
+      runs-on: [self-hosted,git-action-runner]
+      steps:
+      
+        - name: checkout
+          uses: actions/checkout@v3
+        
+        - name: setup python
+          uses: actions/setup-python@v4
+          with:
+            python-version: "3.13.3"
+        
+        - name: install dependency
+          run: pip install mypy flake8 black
+
+        - name: lint and check 
+          run: make lint
+        
+        - name: mattermost notification
+          if: failure()
+          run: |
+               curl -X POST -H 'Content-Type: application/json' \
+                -d '{
+               "text": "❌ *Python linting failed!*\n🔎 Branch: ${{ github.ref_name }}\n🔗 Workflow: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                }' \
+                 ${{ secrets.MATTERMOST_WEBHOOK }}
+        
