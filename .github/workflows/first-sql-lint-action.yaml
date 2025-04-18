@@ -6,7 +6,7 @@ on:
             - "sql/*.sql"
 jobs:
     sql-lint:
-        runs-on: [slef-hosted, git-action-runner]
+        runs-on: [self-hosted, git-action-runner]
         steps:
 
             - name: cehckout
