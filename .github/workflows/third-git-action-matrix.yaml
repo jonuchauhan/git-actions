@@ -5,9 +5,7 @@ on:
 
 jobs:
     multiple-dialect-sql-lint:
-      runs-on:
-           - self-hosted
-           - git-action-runner
+      runs-on: [self-hosted, git-action-runner]
       strategy:
         matrix:
             dialect: [bigquery, vertica]
