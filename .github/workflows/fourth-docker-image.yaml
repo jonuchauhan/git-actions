@@ -14,7 +14,7 @@ jobs:
 
             - name: Build Docker image
               run: |
-                    dsudo ocker build -t localhost:8080/test-images/hello-python:${{ github.sha }} .
+                    sudo ocker build -t localhost:8080/test-images/hello-python:${{ github.sha }} .
             - name: docker-image-push
               run: |
                    sudo docker push localhost:8080/test-images/hello-python:${{ github.sha }}
