@@ -1,0 +1,30 @@
+name: docker-image-build-push
+
+on:
+    workflow_dispatch:
+
+jobs: 
+    image-build-and-push:
+        runs-on: [self-hosted, git-action-runner]
+        steps:
+            - name: checkout
+              uses: actions/checkout@v3 
+            - name: login-to-harbor
+              uses: docker/login-action@v1
+              with:
+                registry: localhost:8080
+                username: ${{ secrets.HARBOR_USERNAME }}
+                password: ${{ secrets.HARBOR_PASSWORD }}
+            - name: Build Docker image
+              run: |
+                   docker build -t localhost:8080/test-images/hello-python:${{ github.sha }} .
+            - name: docker-image-push
+              run: |
+                   docker push localhost:8080/test-images/hello-python:${{ github.sha }}
+            - name: Mattermost notification
+              if: always()
+              run: |
+                STATUS="${{ job.status }}"
+                curl -X POST -H 'Content-Type: application/json' \
+                    -d '{"text": "Docker CI status: '$STATUS' for commit `${{ github.sha }}`."}' \
+                    ${{ secrets.MATTERMOST_WEBHOOK }}
