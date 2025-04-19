@@ -1,0 +1,44 @@
+name: multiple dialext sql-lint
+
+on:
+    workflow_dispatch:
+
+jobs:
+    multiple-dialect-sql-lint:
+      runs-on:
+           - self-hosted
+           - git-action-runner
+      strategy:
+        matrix:
+            dialect: [bigquery, vertica]
+      steps:
+        - name: checkout
+          uses: actions/checkout@v3
+        
+        - name: setup python
+          uses: actions/setup-python@v4
+          with:
+            python-version: "3.13.3"
+        
+        - name: install dependency
+          run: pip install sqlfluff
+
+        - name: dynamic sqlfluff config for ${{matrix.dialect}}
+          run: |
+              echo "[sqlfluff]" > .sqlfluff
+              echo "dialect = ${{ matrix.dialect }}" >> .sqlfluff
+              echo "templater = jinja" >> .sqlfluff
+              echo "[sqlfluff:rules]" >> .sqlfluff
+              echo "max_line_length = 120" >> .sqlfluff
+        - name: sqlfluff lint for ${{matrix.dialect}}
+          run: |
+            sqlfluff lint sql/ --format github-annotation
+        
+        - name: Notify Mattermost on failure
+          if: failure()
+          run: |
+              curl -X POST -H 'Content-Type: application/json' \
+              -d '{
+               "text": "❌ *SQL Lint failed for dialect `${{ matrix.dialect }}`!*\n🔎 Branch: ${{ github.head_ref }}\n🔗 PR: ${{ github.event.pull_request.html_url }}"
+                }' \
+                ${{ secrets.MATTERMOST_WEBHOOK }}
