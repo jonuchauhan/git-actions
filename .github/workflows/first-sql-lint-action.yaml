@@ -1,0 +1,32 @@
+name: simple-sql-lint
+
+on:
+    pull_request:
+        paths:
+            - "sql/*.sql"
+jobs:
+    sql-lint:
+        runs-on: [self-hosted, git-action-runner]
+        steps:
+
+            - name: cehckout
+              uses: actions/checkout@v3
+            - name: pytyhon-setup
+              uses: actions/setup-python@v4
+              with:
+                python-version: "3.13.3"
+            - name: install dependency
+              run: |
+                   pip install sqlfluff 
+            - name: lint
+              run: |
+                    make sql-lint
+            - name: Notify Mattermost on Failure
+              if: failure()
+              run: |
+                   curl -X POST -H 'Content-Type: application/json' \
+                   -d '{
+                   "text": "❌ *SQL Lint failed!*\n🔎 Branch: ${{ github.head_ref }}\n🔗 PR: ${{ github.event.pull_request.html_url }}"
+                       }' \
+                     ${{ secrets.MATTERMOST_WEBHOOK }}
+          
