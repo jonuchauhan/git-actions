@@ -1,4 +1,4 @@
-name: multiple dialext sql-lint
+name: multiple-dialect-sql-lint
 
 on:
     workflow_dispatch:
