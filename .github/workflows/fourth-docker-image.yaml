@@ -10,14 +10,14 @@ jobs:
             - name: checkout
               uses: actions/checkout@v3 
             - name: login-to-harbor
-              run: echo "${{ secrets.HARBOR_PASSWORD }}" | docker login localhost:8080 -u "${{ secrets.HARBOR_USERNAME }}" --password-stdin
+              run: echo "${{ secrets.HARBOR_PASSWORD }}" | sudo docker login localhost:8080 -u "${{ secrets.HARBOR_USERNAME }}" --password-stdin
 
             - name: Build Docker image
               run: |
-                    docker build -t localhost:8080/test-images/hello-python:${{ github.sha }} .
+                    dsudo ocker build -t localhost:8080/test-images/hello-python:${{ github.sha }} .
             - name: docker-image-push
               run: |
-                   docker push localhost:8080/test-images/hello-python:${{ github.sha }}
+                   sudo docker push localhost:8080/test-images/hello-python:${{ github.sha }}
             - name: Mattermost notification
               if: always()
               run: |
